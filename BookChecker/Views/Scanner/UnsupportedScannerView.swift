@@ -7,9 +7,9 @@ struct UnsupportedScannerView: View {
             VStack(spacing: 12) {
                 Image(systemName: "exclamationmark.triangle")
                     .font(.largeTitle)
-                Text("Cámara no disponible")
+                Text("scanner_unsupported_title")
                     .font(.headline)
-                Text("DataScannerViewController requiere un dispositivo real (A12+) y permiso de cámara. Usa la entrada manual.")
+                Text("scanner_unsupported_message")
                     .font(.footnote)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.secondary)

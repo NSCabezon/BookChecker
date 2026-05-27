@@ -9,7 +9,7 @@ struct DetectedPayloadBadge: View {
             Image(systemName: accepted ? "checkmark.circle.fill" : "barcode")
                 .foregroundStyle(accepted ? .green : .yellow)
             VStack(alignment: .leading, spacing: 2) {
-                Text(accepted ? "ISBN" : "Detectado")
+                Text(accepted ? LocalizedStringKey("field_isbn") : LocalizedStringKey("scanner_detected"))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                 Text(payload)

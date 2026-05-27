@@ -10,22 +10,22 @@ struct NotFoundCard: View {
             HStack(spacing: 8) {
                 Image(systemName: "magnifyingglass")
                     .foregroundStyle(.yellow)
-                Text("No encontrado")
+                Text("scanner_not_found_title")
                     .font(.headline)
             }
-            Text("ISBN \(isbn) no aparece en los catálogos. Puedes escanear la portada para capturar título y autor.")
+            Text("scanner_not_found \(isbn)")
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
             HStack(spacing: 10) {
-                Button("Cancelar", role: .cancel, action: onCancel)
+                Button("common_cancel", role: .cancel, action: onCancel)
                     .buttonStyle(.bordered)
                     .controlSize(.small)
                 Spacer()
                 Button {
                     onScanCover()
                 } label: {
-                    Label("Escanear portada", systemImage: "text.viewfinder")
+                    Label("scanner_scan_cover", systemImage: "text.viewfinder")
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.small)

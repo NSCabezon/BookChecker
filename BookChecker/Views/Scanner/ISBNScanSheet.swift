@@ -64,7 +64,7 @@ struct ISBNScanSheet: View {
             HStack(spacing: 8) {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundStyle(.green)
-                Text("Detectado")
+                Text("scanner_detected")
                     .font(.headline)
             }
             HStack(spacing: 6) {
@@ -79,14 +79,14 @@ struct ISBNScanSheet: View {
                 }
             }
             HStack(spacing: 10) {
-                Button("Reintentar", role: .cancel) {
+                Button("common_retry", role: .cancel) {
                     capturedISBN = nil
                     capturedEAN5 = nil
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
                 Spacer()
-                Button("Confirmar") {
+                Button("common_confirm") {
                     onScan(isbn, ean5)
                     dismiss()
                 }

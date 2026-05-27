@@ -11,7 +11,7 @@ struct OCRPanel: View {
 
     private var isAwaitingTitle: Bool { title == nil }
     private var isAwaitingAuthor: Bool { title != nil && author == nil }
-    private var primaryLabel: String { pendingISBN != nil ? "Buscar" : "Confirmar" }
+    private var primaryLabelKey: LocalizedStringKey { pendingISBN != nil ? "common_search" : "common_confirm" }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -27,19 +27,19 @@ struct OCRPanel: View {
                 .background(.tint.opacity(0.2), in: Capsule())
             }
 
-            Text(hint)
+            Text(hintKey)
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-            slotRow(label: "Título", value: title, isActive: isAwaitingTitle, onClear: onClearTitle)
-            slotRow(label: "Autor", value: author, isActive: isAwaitingAuthor, onClear: onClearAuthor)
+            slotRow(labelKey: "field_title", value: title, isActive: isAwaitingTitle, onClear: onClearTitle)
+            slotRow(labelKey: "field_author", value: author, isActive: isAwaitingAuthor, onClear: onClearAuthor)
 
             HStack {
-                Button("Limpiar", role: .destructive, action: onReset)
+                Button("common_clear", role: .destructive, action: onReset)
                     .buttonStyle(.bordered)
                     .controlSize(.small)
                 Spacer()
-                Button(primaryLabel, action: onPrimaryAction)
+                Button(primaryLabelKey, action: onPrimaryAction)
                     .buttonStyle(.borderedProminent)
                     .controlSize(.small)
                     .disabled(title == nil || title?.isEmpty == true)
@@ -50,16 +50,16 @@ struct OCRPanel: View {
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
     }
 
-    private var hint: String {
-        if isAwaitingTitle { return "Toca el título en la cámara" }
-        if isAwaitingAuthor { return "Toca el autor en la cámara" }
-        return pendingISBN != nil ? "Listo. Busca metadata o ajusta los campos." : "Listo. Confirma o ajusta los campos."
+    private var hintKey: LocalizedStringKey {
+        if isAwaitingTitle { return "ocr_tap_title" }
+        if isAwaitingAuthor { return "ocr_tap_author" }
+        return pendingISBN != nil ? "ocr_ready_with_isbn" : "ocr_ready_no_isbn"
     }
 
     @ViewBuilder
-    private func slotRow(label: String, value: String?, isActive: Bool, onClear: @escaping () -> Void) -> some View {
+    private func slotRow(labelKey: LocalizedStringKey, value: String?, isActive: Bool, onClear: @escaping () -> Void) -> some View {
         HStack(alignment: .top, spacing: 8) {
-            Text(label)
+            Text(labelKey)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
                 .frame(width: 50, alignment: .leading)
@@ -74,7 +74,7 @@ struct OCRPanel: View {
                 }
                 .buttonStyle(.plain)
             } else {
-                Text(isActive ? "Esperando…" : "—")
+                Text(isActive ? LocalizedStringKey("ocr_waiting") : LocalizedStringKey("—"))
                     .font(.callout)
                     .foregroundStyle(isActive ? .primary : .secondary)
                     .italic(!isActive)

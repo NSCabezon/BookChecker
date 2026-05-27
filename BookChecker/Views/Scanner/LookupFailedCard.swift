@@ -10,7 +10,7 @@ struct LookupFailedCard: View {
             HStack(spacing: 8) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundStyle(.orange)
-                Text("Error de búsqueda")
+                Text("scanner_lookup_error")
                     .font(.headline)
             }
             Text(message)
@@ -18,11 +18,11 @@ struct LookupFailedCard: View {
                 .foregroundStyle(.secondary)
 
             HStack(spacing: 10) {
-                Button("Cancelar", role: .cancel, action: onCancel)
+                Button("common_cancel", role: .cancel, action: onCancel)
                     .buttonStyle(.bordered)
                     .controlSize(.small)
                 Spacer()
-                Button("Reintentar", action: onRetry)
+                Button("common_retry", action: onRetry)
                     .buttonStyle(.borderedProminent)
                     .controlSize(.small)
             }

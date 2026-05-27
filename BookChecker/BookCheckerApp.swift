@@ -35,9 +35,9 @@ private struct RootView: View {
     var body: some View {
         TabView {
             ScannerView()
-                .tabItem { Label("Scan", systemImage: "barcode.viewfinder") }
+                .tabItem { Label("tab_scan", systemImage: "barcode.viewfinder") }
             LibraryView()
-                .tabItem { Label("Library", systemImage: "books.vertical") }
+                .tabItem { Label("tab_library", systemImage: "books.vertical") }
         }
     }
 }

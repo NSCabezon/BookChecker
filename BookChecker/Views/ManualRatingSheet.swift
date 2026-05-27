@@ -11,7 +11,7 @@ struct ManualRatingSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Tu puntuación") {
+                Section("rating_your") {
                     HStack {
                         Slider(value: $ratingValue, in: 0...5, step: 0.5)
                         Text(String(format: "%.1f", ratingValue))
@@ -21,34 +21,34 @@ struct ManualRatingSheet: View {
                     RatingStarsView(rating: ratingValue, count: nil)
                 }
                 if let avg = book.rating {
-                    Section("Media en internet") {
+                    Section("rating_online") {
                         RatingStarsView(rating: avg, count: book.ratingsCount, compact: true)
                             .foregroundStyle(.secondary)
                     }
                 }
                 Section {
-                    Text("Esta puntuación es tuya y solo aparece en tu biblioteca. No se sube a internet.")
+                    Text("rating_disclaimer")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
             }
-            .navigationTitle("Mi puntuación")
+            .navigationTitle("rating_my_title")
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancelar") { dismiss() }
+                    Button("common_cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Guardar") {
+                    Button("common_save") {
                         save()
                         dismiss()
                     }
                 }
                 ToolbarItem(placement: .destructiveAction) {
                     if book.userRating != nil {
-                        Button("Borrar") {
+                        Button("common_delete") {
                             book.userRating = nil
                             book.updatedAt = .now
                             try? context.save()

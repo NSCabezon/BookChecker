@@ -9,22 +9,22 @@ struct ManualISBNEntryView: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("ISBN (10 ó 13 dígitos)", text: $input)
+                    TextField("scanner_isbn_field_placeholder", text: $input)
                         #if os(iOS)
                         .keyboardType(.numberPad)
                         #endif
                 }
             }
-            .navigationTitle("Entrada manual")
+            .navigationTitle("scanner_manual_entry")
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancelar") { dismiss() }
+                    Button("common_cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Añadir") {
+                    Button("common_add") {
                         let digits = input.filter(\.isNumber)
                         guard digits.count == 10 || digits.count == 13 else { return }
                         onSubmit(digits)

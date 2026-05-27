@@ -1,16 +1,16 @@
 import SwiftUI
 
 struct LookupSpinner: View {
-    let message: String
+    let messageKey: LocalizedStringKey
 
-    init(message: String = "Buscando…") {
-        self.message = message
+    init(messageKey: LocalizedStringKey = "scanner_lookup_default") {
+        self.messageKey = messageKey
     }
 
     var body: some View {
         HStack(spacing: 12) {
             ProgressView()
-            Text(message)
+            Text(messageKey)
                 .font(.subheadline)
             Spacer()
         }
@@ -27,7 +27,7 @@ struct LookupSpinner: View {
 }
 
 #Preview("Custom message") {
-    LookupSpinner(message: "Buscando por título…")
+    LookupSpinner(messageKey: "rating_searching")
         .padding()
         .background(Color.gray)
 }

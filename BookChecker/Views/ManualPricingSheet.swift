@@ -13,38 +13,38 @@ struct ManualPricingSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Precio (EUR)") {
-                    TextField("Mínimo", text: $minText)
+                Section("pricing_price_eur") {
+                    TextField("pricing_minimum", text: $minText)
                         #if os(iOS)
                         .keyboardType(.decimalPad)
                         #endif
-                    TextField("Máximo", text: $maxText)
+                    TextField("pricing_maximum", text: $maxText)
                         #if os(iOS)
                         .keyboardType(.decimalPad)
                         #endif
                 }
-                Section("Listings") {
-                    TextField("Número de listings", text: $countText)
+                Section("pricing_listings") {
+                    TextField("pricing_listings_count", text: $countText)
                         #if os(iOS)
                         .keyboardType(.numberPad)
                         #endif
                 }
                 Section {
-                    Text("Si rellenas mínimo y máximo iguales, basta con uno. Los valores se guardan como `manual` y aparecen en la sección Pricing.")
+                    Text("pricing_disclaimer")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
             }
-            .navigationTitle("Precio manual")
+            .navigationTitle("pricing_manual_title")
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancelar") { dismiss() }
+                    Button("common_cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Guardar") {
+                    Button("common_save") {
                         save()
                         dismiss()
                     }

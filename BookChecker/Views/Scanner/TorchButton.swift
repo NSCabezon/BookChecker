@@ -13,7 +13,7 @@ struct TorchButton: View {
                 .background(.ultraThinMaterial, in: Circle())
                 .foregroundStyle(isOn ? .yellow : .primary)
         }
-        .accessibilityLabel(isOn ? "Apagar linterna" : "Encender linterna")
+        .accessibilityLabel(isOn ? Text("scanner_torch_off_a11y") : Text("scanner_torch_on_a11y"))
     }
 }
 

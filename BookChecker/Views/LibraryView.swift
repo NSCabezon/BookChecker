@@ -18,12 +18,12 @@ struct LibraryView: View {
                         Button(role: .destructive) {
                             bookPendingDeletion = book
                         } label: {
-                            Label("Borrar", systemImage: "trash")
+                            Label("common_delete", systemImage: "trash")
                         }
                     }
                 }
             }
-            .navigationTitle("Library")
+            .navigationTitle("library_title")
             .navigationDestination(for: Book.self) { book in
                 BookDetailView(book: book)
             }
@@ -33,9 +33,9 @@ struct LibraryView: View {
                         filter = nil
                     } label: {
                         if filter == nil {
-                            Label("All", systemImage: "checkmark")
+                            Label("library_filter_all", systemImage: "checkmark")
                         } else {
-                            Text("All")
+                            Text("library_filter_all")
                         }
                     }
                     ForEach(BookDecision.allCases) { d in
@@ -43,9 +43,9 @@ struct LibraryView: View {
                             filter = d
                         } label: {
                             if filter == d {
-                                Label(d.rawValue.capitalized, systemImage: "checkmark")
+                                Label { Text(d.displayKey) } icon: { Image(systemName: "checkmark") }
                             } else {
-                                Text(d.rawValue.capitalized)
+                                Text(d.displayKey)
                             }
                         }
                     }
@@ -62,22 +62,24 @@ struct LibraryView: View {
                 titleVisibility: .visible,
                 presenting: bookPendingDeletion
             ) { book in
-                Button("Borrar", role: .destructive) {
+                Button("common_delete", role: .destructive) {
                     delete(book)
                 }
-                Button("Cancelar", role: .cancel) {
+                Button("common_cancel", role: .cancel) {
                     bookPendingDeletion = nil
                 }
             } message: { _ in
-                Text("Esta acción no se puede deshacer.")
+                Text("library_delete_message")
             }
         }
     }
 
-    private var deletionTitle: String {
-        guard let book = bookPendingDeletion else { return "Borrar libro" }
-        let label = book.title ?? book.isbn ?? "este libro"
-        return "¿Borrar \(label)?"
+    private var deletionTitle: LocalizedStringKey {
+        guard let book = bookPendingDeletion else { return "library_delete_unnamed" }
+        if let label = book.title ?? book.isbn {
+            return "library_delete_named \(label)"
+        }
+        return "library_delete_unnamed"
     }
 
     private var filtered: [Book] {
@@ -125,7 +127,7 @@ private struct BookRow: View {
             }
             Spacer()
             VStack(alignment: .trailing, spacing: 4) {
-                Text(book.decision.rawValue.capitalized)
+                Text(book.decision.displayKey)
                     .font(.caption2)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)

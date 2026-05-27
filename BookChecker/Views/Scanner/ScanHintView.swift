@@ -1,16 +1,16 @@
 import SwiftUI
 
 struct ScanHintView: View {
-    let text: String
-    let actionLabel: String
+    let textKey: LocalizedStringKey
+    let actionLabelKey: LocalizedStringKey
     let onAction: () -> Void
 
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "barcode.viewfinder")
-            Text(text).font(.subheadline)
+            Text(textKey).font(.subheadline)
             Spacer()
-            Button(actionLabel) { onAction() }
+            Button(actionLabelKey) { onAction() }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
         }
@@ -21,7 +21,7 @@ struct ScanHintView: View {
 }
 
 #Preview {
-    ScanHintView(text: "Apunta a un ISBN", actionLabel: "Manual") {}
+    ScanHintView(textKey: "scanner_hint_scan_isbn", actionLabelKey: "scanner_manual") {}
         .padding()
         .background(Color.gray)
 }

@@ -26,10 +26,17 @@ struct DecisionOverlay: View {
                 }
                 .foregroundStyle(.secondary)
             }
-            Text(book.title ?? "Sin título")
-                .font(.headline)
-                .lineLimit(2)
-                .multilineTextAlignment(.center)
+            if let t = book.title, !t.isEmpty {
+                Text(t)
+                    .font(.headline)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+            } else {
+                Text("common_no_title")
+                    .font(.headline)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+            }
             if !book.authors.isEmpty {
                 Text(book.authors.joined(separator: ", "))
                     .font(.caption)
@@ -39,10 +46,10 @@ struct DecisionOverlay: View {
             hintRow
 
             HStack(spacing: 10) {
-                Button("Donate") { commit(.donate) }
-                Button("Pending") { commit(.pending) }
-                Button("Sell") { commit(.sell) }
-                Button("Keep") { commit(.keep) }
+                Button(action: { commit(.donate) }) { Text(BookDecision.donate.displayKey) }
+                Button(action: { commit(.pending) }) { Text(BookDecision.pending.displayKey) }
+                Button(action: { commit(.sell) }) { Text(BookDecision.sell.displayKey) }
+                Button(action: { commit(.keep) }) { Text(BookDecision.keep.displayKey) }
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.small)
@@ -57,38 +64,47 @@ struct DecisionOverlay: View {
         .gesture(dragGesture)
         .onTapGesture(count: 2) { commit(.pending) }
         .accessibilityElement(children: .combine)
-        .accessibilityHint("Desliza arriba para guardar, abajo para donar, izquierda o derecha para vender, doble toque para dejar pendiente.")
-        .accessibilityAction(named: "Keep") { commit(.keep) }
-        .accessibilityAction(named: "Sell") { commit(.sell) }
-        .accessibilityAction(named: "Donate") { commit(.donate) }
-        .accessibilityAction(named: "Pending") { commit(.pending) }
+        .accessibilityHint(Text("overlay_a11y_hint"))
+        .accessibilityAction(named: Text(BookDecision.keep.displayKey)) { commit(.keep) }
+        .accessibilityAction(named: Text(BookDecision.sell.displayKey)) { commit(.sell) }
+        .accessibilityAction(named: Text(BookDecision.donate.displayKey)) { commit(.donate) }
+        .accessibilityAction(named: Text(BookDecision.pending.displayKey)) { commit(.pending) }
         .transition(.move(edge: .bottom).combined(with: .opacity))
     }
 
     @ViewBuilder
     private var hintRow: some View {
         if let staged = stagedDecision {
-            Text("Suelta para \(label(for: staged))")
+            Text(releaseKey(for: staged))
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundStyle(.tint)
         } else {
             HStack(spacing: 12) {
-                hintChip(symbol: "arrow.up", label: "Keep")
-                hintChip(symbol: "arrow.down", label: "Donate")
-                hintChip(symbol: "arrow.left.and.right", label: "Sell")
-                hintChip(symbol: "hand.tap", label: "2× Pending")
+                hintChip(symbol: "arrow.up", labelKey: BookDecision.keep.displayKey)
+                hintChip(symbol: "arrow.down", labelKey: BookDecision.donate.displayKey)
+                hintChip(symbol: "arrow.left.and.right", labelKey: BookDecision.sell.displayKey)
+                hintChip(symbol: "hand.tap", labelKey: "overlay_hint_pending_doubletap")
             }
             .foregroundStyle(.secondary)
         }
     }
 
-    private func hintChip(symbol: String, label: String) -> some View {
+    private func hintChip(symbol: String, labelKey: LocalizedStringKey) -> some View {
         HStack(spacing: 3) {
             Image(systemName: symbol)
-            Text(label)
+            Text(labelKey)
         }
         .font(.caption2)
+    }
+
+    private func releaseKey(for decision: BookDecision) -> LocalizedStringKey {
+        switch decision {
+        case .keep: return "overlay_release_for_keep"
+        case .sell: return "overlay_release_for_sell"
+        case .donate: return "overlay_release_for_donate"
+        case .pending: return "overlay_release_for_pending"
+        }
     }
 
     private var dragGesture: some Gesture {
@@ -117,15 +133,6 @@ struct DecisionOverlay: View {
     private func commit(_ decision: BookDecision) {
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         onDecide(decision)
-    }
-
-    private func label(for decision: BookDecision) -> String {
-        switch decision {
-        case .keep: return "Keep"
-        case .sell: return "Sell"
-        case .donate: return "Donate"
-        case .pending: return "Pending"
-        }
     }
 }
 

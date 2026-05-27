@@ -16,7 +16,7 @@ struct PreviewCard: View {
                             .font(.headline)
                             .lineLimit(3)
                     } else {
-                        Text("Sin título")
+                        Text("common_no_title")
                             .font(.headline)
                             .foregroundStyle(.secondary)
                     }
@@ -54,7 +54,7 @@ struct PreviewCard: View {
                         }
                     }
                     if let source = draft.source {
-                        Text("Fuente: \(source)")
+                        Text("preview_source \(source)")
                             .font(.caption2)
                             .foregroundStyle(.tertiary)
                     }
@@ -67,14 +67,14 @@ struct PreviewCard: View {
             }
 
             HStack(spacing: 10) {
-                Button("Cancelar", role: .cancel, action: onCancel)
+                Button("common_cancel", role: .cancel, action: onCancel)
                     .buttonStyle(.bordered)
                     .controlSize(.small)
-                Button("Editar", action: onEdit)
+                Button("common_edit", action: onEdit)
                     .buttonStyle(.bordered)
                     .controlSize(.small)
                 Spacer()
-                Button("Confirmar", action: onConfirm)
+                Button("common_confirm", action: onConfirm)
                     .buttonStyle(.borderedProminent)
                     .controlSize(.small)
             }

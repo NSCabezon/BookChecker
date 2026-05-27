@@ -10,36 +10,36 @@ struct EditDraftSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Metadata") {
-                    TextField("Título", text: Binding($draft.title, replacingNilWith: ""))
-                    TextField("Autores (separados por coma)", text: $authorsField)
-                    TextField("Editorial", text: Binding($draft.publisher, replacingNilWith: ""))
-                    TextField("Año", value: $draft.year, format: .number.grouping(.never))
+                Section("field_metadata") {
+                    TextField("field_title", text: Binding($draft.title, replacingNilWith: ""))
+                    TextField("field_authors_comma", text: $authorsField)
+                    TextField("field_publisher", text: Binding($draft.publisher, replacingNilWith: ""))
+                    TextField("field_year", value: $draft.year, format: .number.grouping(.never))
                         #if os(iOS)
                         .keyboardType(.numberPad)
                         #endif
                 }
-                Section("Identificadores") {
-                    TextField("ISBN", text: Binding($draft.isbn, replacingNilWith: ""))
+                Section("field_identifiers") {
+                    TextField("field_isbn", text: Binding($draft.isbn, replacingNilWith: ""))
                         #if os(iOS)
                         .keyboardType(.numberPad)
                         #endif
-                    TextField("EAN-5", text: Binding($draft.ean5, replacingNilWith: ""))
+                    TextField("field_ean5", text: Binding($draft.ean5, replacingNilWith: ""))
                         #if os(iOS)
                         .keyboardType(.numberPad)
                         #endif
                 }
             }
-            .navigationTitle("Editar libro")
+            .navigationTitle("scanner_edit_book")
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancelar") { onCancel() }
+                    Button("common_cancel") { onCancel() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Guardar") {
+                    Button("common_save") {
                         commitAuthors()
                         onSave()
                     }

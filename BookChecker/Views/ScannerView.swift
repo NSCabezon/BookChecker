@@ -6,10 +6,10 @@ enum ScanMode: String, CaseIterable, Identifiable {
     case ocr
 
     var id: String { rawValue }
-    var label: String {
+    var labelKey: LocalizedStringKey {
         switch self {
-        case .barcode: return "Código"
-        case .ocr: return "OCR"
+        case .barcode: return "scanner_mode_barcode"
+        case .ocr: return "scanner_mode_ocr"
         }
     }
 }
@@ -44,9 +44,9 @@ struct ScannerView: View {
 
                 bottomPanel
 
-                Picker("Modo", selection: $scanMode) {
+                Picker("scanner_mode_picker_a11y", selection: $scanMode) {
                     ForEach(ScanMode.allCases) { mode in
-                        Text(mode.label).tag(mode)
+                        Text(mode.labelKey).tag(mode)
                     }
                 }
                 .pickerStyle(.segmented)
@@ -120,7 +120,7 @@ struct ScannerView: View {
         case .ready:
             switch scanMode {
             case .barcode:
-                ScanHintView(text: "Apunta a un ISBN", actionLabel: "Manual") {
+                ScanHintView(textKey: "scanner_hint_scan_isbn", actionLabelKey: "scanner_manual") {
                     showManualEntry = true
                 }
                 .padding()
@@ -139,11 +139,11 @@ struct ScannerView: View {
             }
 
         case .lookingUp(let isbn, _):
-            LookupSpinner(message: "Buscando ISBN \(isbn)…")
+            LookupSpinner(messageKey: "scanner_lookup_isbn \(isbn)")
                 .padding()
 
         case .searchingByText(_, _, let title, _):
-            LookupSpinner(message: "Buscando: \(title)…")
+            LookupSpinner(messageKey: "scanner_lookup_text \(title)")
                 .padding()
 
         case .previewing(let draft):

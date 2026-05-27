@@ -14,9 +14,9 @@ struct BookDetailView: View {
 
     var body: some View {
         Form {
-            Section("Metadata") {
-                TextField("Title", text: Binding($book.title, replacingNilWith: ""))
-                TextField("Authors (separados por coma)", text: Binding(
+            Section("field_metadata") {
+                TextField("field_title", text: Binding($book.title, replacingNilWith: ""))
+                TextField("field_authors_comma", text: Binding(
                     get: { book.authors.joined(separator: ", ") },
                     set: { newValue in
                         book.authors = newValue
@@ -26,7 +26,7 @@ struct BookDetailView: View {
                     }
                 ))
                 HStack {
-                    TextField("ISBN", text: Binding($book.isbn, replacingNilWith: ""))
+                    TextField("field_isbn", text: Binding($book.isbn, replacingNilWith: ""))
                         #if os(iOS)
                         .keyboardType(.numberPad)
                         #endif
@@ -36,20 +36,20 @@ struct BookDetailView: View {
                         Image(systemName: "barcode.viewfinder")
                     }
                     .buttonStyle(.borderless)
-                    .accessibilityLabel("Escanear ISBN")
+                    .accessibilityLabel(Text("detail_scan_isbn_a11y"))
                 }
-                TextField("EAN-5", text: Binding($book.ean5, replacingNilWith: ""))
+                TextField("field_ean5", text: Binding($book.ean5, replacingNilWith: ""))
                     #if os(iOS)
                     .keyboardType(.numberPad)
                     #endif
-                TextField("Publisher", text: Binding($book.publisher, replacingNilWith: ""))
+                TextField("field_publisher", text: Binding($book.publisher, replacingNilWith: ""))
             }
 
-            Section("Media en internet") {
+            Section("rating_online") {
                 if let rating = book.rating {
                     RatingStarsView(rating: rating, count: book.ratingsCount)
                 } else {
-                    Text("Sin puntuación")
+                    Text("rating_not_rated")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                 }
@@ -59,58 +59,58 @@ struct BookDetailView: View {
                     HStack {
                         if isRefreshingRating {
                             ProgressView()
-                            Text("Buscando…")
+                            Text("rating_searching")
                         } else {
                             Image(systemName: "arrow.clockwise")
-                            Text(book.rating == nil ? "Buscar puntuación" : "Actualizar puntuación")
+                            Text(book.rating == nil ? LocalizedStringKey("rating_find") : LocalizedStringKey("rating_refresh"))
                         }
                     }
                 }
                 .disabled(isRefreshingRating || (book.isbn ?? "").isEmpty)
             }
 
-            Section("Mi puntuación") {
+            Section("rating_my_title") {
                 if let user = book.userRating {
                     RatingStarsView(rating: user, count: nil)
                 } else {
-                    Text("Sin valorar")
+                    Text("rating_not_rated_yet")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                 }
                 Button {
                     showManualUserRating = true
                 } label: {
-                    Label(book.userRating == nil ? "Puntuar libro" : "Editar mi puntuación", systemImage: "pencil")
+                    Label(book.userRating == nil ? LocalizedStringKey("rating_rate_book") : LocalizedStringKey("rating_edit_my"), systemImage: "pencil")
                 }
             }
 
-            Section("Decision") {
-                Picker("Decision", selection: $book.decision) {
+            Section("decision_section") {
+                Picker("decision_section", selection: $book.decision) {
                     ForEach(BookDecision.allCases) { d in
-                        Text(d.rawValue.capitalized).tag(d)
+                        Text(d.displayKey).tag(d)
                     }
                 }
                 if book.decision == .keep {
-                    Picker("Reason", selection: Binding($book.keepReason, default: .other)) {
+                    Picker("decision_reason", selection: Binding($book.keepReason, default: .other)) {
                         ForEach(KeepReason.allCases) { r in
-                            Text(r.rawValue).tag(r)
+                            Text(r.displayKey).tag(r)
                         }
                     }
                 }
             }
 
-            Section("Pricing") {
+            Section("pricing_section") {
                 if let min = book.priceMin {
-                    LabeledContent("Min", value: min.formatted(.currency(code: "EUR")))
+                    LabeledContent("pricing_min", value: min.formatted(.currency(code: "EUR")))
                 }
                 if let max = book.priceMax {
-                    LabeledContent("Max", value: max.formatted(.currency(code: "EUR")))
+                    LabeledContent("pricing_max", value: max.formatted(.currency(code: "EUR")))
                 }
                 if let count = book.listingsCount {
-                    LabeledContent("Listings", value: "\(count)")
+                    LabeledContent("pricing_listings", value: "\(count)")
                 }
                 if let at = book.priceCheckedAt {
-                    LabeledContent("Checked", value: at.formatted(date: .abbreviated, time: .shortened))
+                    LabeledContent("pricing_checked", value: at.formatted(date: .abbreviated, time: .shortened))
                 }
                 Button {
                     Task { await refreshPricing() }
@@ -118,10 +118,10 @@ struct BookDetailView: View {
                     HStack {
                         if isRefreshingPrice {
                             ProgressView()
-                            Text("Buscando…")
+                            Text("rating_searching")
                         } else {
                             Image(systemName: "arrow.clockwise")
-                            Text("Actualizar precio")
+                            Text("pricing_refresh")
                         }
                     }
                 }
@@ -131,17 +131,17 @@ struct BookDetailView: View {
                     Button {
                         showManualPricing = true
                     } label: {
-                        Label("Introducir manualmente", systemImage: "pencil")
+                        Label("pricing_enter_manually", systemImage: "pencil")
                     }
                 }
             }
 
-            Section("Notes") {
-                TextField("Notes", text: Binding($book.notes, replacingNilWith: ""), axis: .vertical)
+            Section("field_notes") {
+                TextField("field_notes", text: Binding($book.notes, replacingNilWith: ""), axis: .vertical)
                     .lineLimit(3...6)
             }
         }
-        .navigationTitle(book.title ?? book.isbn ?? "Book")
+        .navigationTitle(book.title.map(Text.init) ?? book.isbn.map(Text.init) ?? Text("detail_book_fallback_title"))
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showISBNScanner) {
             ISBNScanSheet { isbn, ean5 in

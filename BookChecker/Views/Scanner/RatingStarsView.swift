@@ -19,7 +19,7 @@ struct RatingStarsView: View {
                 Text(String(format: "%.1f", rating))
                     .font(.caption2)
                 if let count {
-                    Text("(\(count))")
+                    Text(verbatim: "(\(count))")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
@@ -33,7 +33,7 @@ struct RatingStarsView: View {
                     .foregroundStyle(.secondary)
                     .padding(.leading, 4)
                 if let count {
-                    Text("(\(count) reseñas)")
+                    Text("rating_count_reviews \(count)")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
