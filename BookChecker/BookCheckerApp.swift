@@ -16,9 +16,12 @@ struct BookCheckerApp: App {
         }
     }()
 
+    let resolver = MetadataResolver.makeDefault()
+
     var body: some Scene {
         WindowGroup {
             RootView()
+                .environment(\.metadataResolver, resolver)
         }
         .modelContainer(sharedModelContainer)
     }

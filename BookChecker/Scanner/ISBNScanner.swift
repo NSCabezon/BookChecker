@@ -6,16 +6,19 @@ import VisionKit
 struct ISBNScanner: UIViewControllerRepresentable {
     let onScan: (String, String?) -> Void
     let onRawDetect: ((String) -> Void)?
+    let onTextTap: ((String) -> Void)?
     @Binding var torchOn: Bool
 
     init(
         torchOn: Binding<Bool>,
         onScan: @escaping (String, String?) -> Void,
-        onRawDetect: ((String) -> Void)? = nil
+        onRawDetect: ((String) -> Void)? = nil,
+        onTextTap: ((String) -> Void)? = nil
     ) {
         self._torchOn = torchOn
         self.onScan = onScan
         self.onRawDetect = onRawDetect
+        self.onTextTap = onTextTap
     }
 
     static var isAvailable: Bool {
@@ -40,6 +43,7 @@ struct ISBNScanner: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: DataScannerViewController, context: Context) {
         context.coordinator.onScan = onScan
         context.coordinator.onRawDetect = onRawDetect
+        context.coordinator.onTextTap = onTextTap
 
         if !uiViewController.isScanning {
             do {
@@ -76,19 +80,31 @@ struct ISBNScanner: UIViewControllerRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(onScan: onScan, onRawDetect: onRawDetect)
+        Coordinator(onScan: onScan, onRawDetect: onRawDetect, onTextTap: onTextTap)
+    }
+
+    static func dismantleUIViewController(_ uiViewController: DataScannerViewController, coordinator: Coordinator) {
+        if uiViewController.isScanning {
+            uiViewController.stopScanning()
+        }
     }
 
     final class Coordinator: NSObject, DataScannerViewControllerDelegate {
         var onScan: (String, String?) -> Void
         var onRawDetect: ((String) -> Void)?
+        var onTextTap: ((String) -> Void)?
         private var lastScannedISBN: String?
         private var lastScannedEAN5: String?
         private var lastScanAt: Date = .distantPast
 
-        init(onScan: @escaping (String, String?) -> Void, onRawDetect: ((String) -> Void)?) {
+        init(
+            onScan: @escaping (String, String?) -> Void,
+            onRawDetect: ((String) -> Void)?,
+            onTextTap: ((String) -> Void)?
+        ) {
             self.onScan = onScan
             self.onRawDetect = onRawDetect
+            self.onTextTap = onTextTap
         }
 
         func dataScanner(
@@ -108,6 +124,14 @@ struct ISBNScanner: UIViewControllerRepresentable {
         }
 
         func dataScanner(_ dataScanner: DataScannerViewController, didTapOn item: RecognizedItem) {
+            if case let .text(text) = item {
+                let trimmed = text.transcript.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !trimmed.isEmpty {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    onTextTap?(trimmed)
+                }
+                return
+            }
             correlate(allItems: [item])
         }
 

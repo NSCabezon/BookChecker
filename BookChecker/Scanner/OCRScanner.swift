@@ -55,6 +55,12 @@ struct OCRScanner: UIViewControllerRepresentable {
         Coordinator(onTextTap: onTextTap)
     }
 
+    static func dismantleUIViewController(_ uiViewController: DataScannerViewController, coordinator: Coordinator) {
+        if uiViewController.isScanning {
+            uiViewController.stopScanning()
+        }
+    }
+
     final class Coordinator: NSObject, DataScannerViewControllerDelegate {
         var onTextTap: (String) -> Void
 

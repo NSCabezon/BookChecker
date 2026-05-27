@@ -12,8 +12,18 @@ struct GoogleBooksService: MetadataProvider {
     }
 
     func fetchMetadata(isbn: String) async -> BookMetadata? {
+        await query(q: "isbn:\(isbn)")
+    }
+
+    func searchMetadata(title: String, author: String?) async -> BookMetadata? {
+        let titlePart = "intitle:\(title)"
+        let authorPart = author.map { "+inauthor:\($0)" } ?? ""
+        return await query(q: titlePart + authorPart)
+    }
+
+    private func query(q: String) async -> BookMetadata? {
         var components = URLComponents(string: "https://www.googleapis.com/books/v1/volumes")!
-        var items = [URLQueryItem(name: "q", value: "isbn:\(isbn)")]
+        var items = [URLQueryItem(name: "q", value: q)]
         if let apiKey {
             items.append(URLQueryItem(name: "key", value: apiKey))
         }

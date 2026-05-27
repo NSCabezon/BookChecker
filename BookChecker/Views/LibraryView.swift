@@ -84,6 +84,15 @@ struct LibraryView: View {
     }
 }
 
+#Preview {
+    LibraryView()
+        .modelContainer(PreviewSamples.inMemoryContainer(with: [
+            PreviewSamples.bookPending,
+            PreviewSamples.bookSell,
+            PreviewSamples.bookKeep
+        ]))
+}
+
 private struct BookRow: View {
     let book: Book
 

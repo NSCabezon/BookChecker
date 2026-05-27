@@ -8,6 +8,15 @@ struct BookDetailView: View {
         Form {
             Section("Metadata") {
                 TextField("Title", text: Binding($book.title, replacingNilWith: ""))
+                TextField("Authors (separados por coma)", text: Binding(
+                    get: { book.authors.joined(separator: ", ") },
+                    set: { newValue in
+                        book.authors = newValue
+                            .split(separator: ",")
+                            .map { $0.trimmingCharacters(in: .whitespaces) }
+                            .filter { !$0.isEmpty }
+                    }
+                ))
                 TextField("ISBN", text: Binding($book.isbn, replacingNilWith: ""))
                 TextField("Publisher", text: Binding($book.publisher, replacingNilWith: ""))
             }
@@ -52,20 +61,10 @@ struct BookDetailView: View {
     }
 }
 
-private extension Binding where Value == String {
-    init(_ source: Binding<String?>, replacingNilWith fallback: String) {
-        self.init(
-            get: { source.wrappedValue ?? fallback },
-            set: { source.wrappedValue = $0.isEmpty ? nil : $0 }
-        )
+#Preview {
+    NavigationStack {
+        BookDetailView(book: PreviewSamples.bookSell)
     }
+    .modelContainer(PreviewSamples.inMemoryContainer(with: [PreviewSamples.bookSell]))
 }
 
-private extension Binding {
-    init<T>(_ source: Binding<T?>, default defaultValue: T) where Value == T {
-        self.init(
-            get: { source.wrappedValue ?? defaultValue },
-            set: { source.wrappedValue = $0 }
-        )
-    }
-}

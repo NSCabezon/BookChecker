@@ -16,6 +16,11 @@ struct BookMetadata: Sendable, Equatable {
 protocol MetadataProvider: Sendable {
     var name: String { get }
     func fetchMetadata(isbn: String) async -> BookMetadata?
+    func searchMetadata(title: String, author: String?) async -> BookMetadata?
+}
+
+extension MetadataProvider {
+    func searchMetadata(title: String, author: String?) async -> BookMetadata? { nil }
 }
 
 actor MetadataResolver {
@@ -28,6 +33,15 @@ actor MetadataResolver {
     func fetch(isbn: String) async -> BookMetadata? {
         for provider in providers {
             if let result = await provider.fetchMetadata(isbn: isbn), result.isUsable {
+                return result
+            }
+        }
+        return nil
+    }
+
+    func search(title: String, author: String?) async -> BookMetadata? {
+        for provider in providers {
+            if let result = await provider.searchMetadata(title: title, author: author), result.isUsable {
                 return result
             }
         }
