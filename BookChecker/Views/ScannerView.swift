@@ -276,6 +276,9 @@ struct ScannerView: View {
         try? context.save()
         state = .deciding(book)
         Task { await updatePricing(for: book, using: pricingAggregator, context: context) }
+        if book.rating == nil {
+            Task { await updateRating(for: book, using: resolver, context: context) }
+        }
     }
 
     private func cancelDraft() {

@@ -4,9 +4,13 @@ import SwiftData
 struct BookDetailView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.pricingAggregator) private var pricingAggregator
+    @Environment(\.metadataResolver) private var resolver
     @Bindable var book: Book
     @State private var showISBNScanner = false
     @State private var isRefreshingPrice = false
+    @State private var isRefreshingRating = false
+    @State private var showManualPricing = false
+    @State private var showManualUserRating = false
 
     var body: some View {
         Form {
@@ -41,9 +45,42 @@ struct BookDetailView: View {
                 TextField("Publisher", text: Binding($book.publisher, replacingNilWith: ""))
             }
 
-            if let rating = book.rating {
-                Section("Rating") {
+            Section("Media en internet") {
+                if let rating = book.rating {
                     RatingStarsView(rating: rating, count: book.ratingsCount)
+                } else {
+                    Text("Sin puntuación")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                }
+                Button {
+                    Task { await refreshRating() }
+                } label: {
+                    HStack {
+                        if isRefreshingRating {
+                            ProgressView()
+                            Text("Buscando…")
+                        } else {
+                            Image(systemName: "arrow.clockwise")
+                            Text(book.rating == nil ? "Buscar puntuación" : "Actualizar puntuación")
+                        }
+                    }
+                }
+                .disabled(isRefreshingRating || (book.isbn ?? "").isEmpty)
+            }
+
+            Section("Mi puntuación") {
+                if let user = book.userRating {
+                    RatingStarsView(rating: user, count: nil)
+                } else {
+                    Text("Sin valorar")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                }
+                Button {
+                    showManualUserRating = true
+                } label: {
+                    Label(book.userRating == nil ? "Puntuar libro" : "Editar mi puntuación", systemImage: "pencil")
                 }
             }
 
@@ -89,6 +126,14 @@ struct BookDetailView: View {
                     }
                 }
                 .disabled(isRefreshingPrice || (book.isbn ?? "").isEmpty)
+
+                if book.priceMin == nil && book.priceMax == nil {
+                    Button {
+                        showManualPricing = true
+                    } label: {
+                        Label("Introducir manualmente", systemImage: "pencil")
+                    }
+                }
             }
 
             Section("Notes") {
@@ -105,12 +150,24 @@ struct BookDetailView: View {
                 book.updatedAt = .now
             }
         }
+        .sheet(isPresented: $showManualPricing) {
+            ManualPricingSheet(book: book)
+        }
+        .sheet(isPresented: $showManualUserRating) {
+            ManualRatingSheet(book: book)
+        }
     }
 
     private func refreshPricing() async {
         isRefreshingPrice = true
         await updatePricing(for: book, using: pricingAggregator, context: context)
         isRefreshingPrice = false
+    }
+
+    private func refreshRating() async {
+        isRefreshingRating = true
+        await updateRating(for: book, using: resolver, context: context)
+        isRefreshingRating = false
     }
 }
 

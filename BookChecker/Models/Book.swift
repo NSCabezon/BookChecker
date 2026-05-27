@@ -24,6 +24,7 @@ final class Book {
 
     var rating: Double?
     var ratingsCount: Int?
+    var userRating: Double?
 
     @Attribute(.externalStorage) var photoData: Data?
 
@@ -49,6 +50,7 @@ final class Book {
         priceCheckedAt: Date? = nil,
         rating: Double? = nil,
         ratingsCount: Int? = nil,
+        userRating: Double? = nil,
         photoData: Data? = nil,
         createdAt: Date = .now,
         updatedAt: Date = .now
@@ -71,6 +73,7 @@ final class Book {
         self.priceCheckedAt = priceCheckedAt
         self.rating = rating
         self.ratingsCount = ratingsCount
+        self.userRating = userRating
         self.photoData = photoData
         self.createdAt = createdAt
         self.updatedAt = updatedAt
