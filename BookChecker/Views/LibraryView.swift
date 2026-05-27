@@ -32,13 +32,21 @@ struct LibraryView: View {
                     Button {
                         filter = nil
                     } label: {
-                        Label("All", systemImage: filter == nil ? "checkmark" : "")
+                        if filter == nil {
+                            Label("All", systemImage: "checkmark")
+                        } else {
+                            Text("All")
+                        }
                     }
                     ForEach(BookDecision.allCases) { d in
                         Button {
                             filter = d
                         } label: {
-                            Label(d.rawValue.capitalized, systemImage: filter == d ? "checkmark" : "")
+                            if filter == d {
+                                Label(d.rawValue.capitalized, systemImage: "checkmark")
+                            } else {
+                                Text(d.rawValue.capitalized)
+                            }
                         }
                     }
                 } label: {
