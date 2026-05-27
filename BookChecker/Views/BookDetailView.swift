@@ -3,6 +3,7 @@ import SwiftData
 
 struct BookDetailView: View {
     @Bindable var book: Book
+    @State private var showISBNScanner = false
 
     var body: some View {
         Form {
@@ -17,7 +18,23 @@ struct BookDetailView: View {
                             .filter { !$0.isEmpty }
                     }
                 ))
-                TextField("ISBN", text: Binding($book.isbn, replacingNilWith: ""))
+                HStack {
+                    TextField("ISBN", text: Binding($book.isbn, replacingNilWith: ""))
+                        #if os(iOS)
+                        .keyboardType(.numberPad)
+                        #endif
+                    Button {
+                        showISBNScanner = true
+                    } label: {
+                        Image(systemName: "barcode.viewfinder")
+                    }
+                    .buttonStyle(.borderless)
+                    .accessibilityLabel("Escanear ISBN")
+                }
+                TextField("EAN-5", text: Binding($book.ean5, replacingNilWith: ""))
+                    #if os(iOS)
+                    .keyboardType(.numberPad)
+                    #endif
                 TextField("Publisher", text: Binding($book.publisher, replacingNilWith: ""))
             }
 
@@ -58,6 +75,13 @@ struct BookDetailView: View {
         }
         .navigationTitle(book.title ?? book.isbn ?? "Book")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showISBNScanner) {
+            ISBNScanSheet { isbn, ean5 in
+                book.isbn = isbn
+                if let ean5 { book.ean5 = ean5 }
+                book.updatedAt = .now
+            }
+        }
     }
 }
 
