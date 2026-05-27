@@ -14,7 +14,7 @@ struct ScannerView: View {
             if ISBNScanner.isAvailable {
                 ISBNScanner(
                     torchOn: $torchOn,
-                    onScan: { isbn in Task { await handle(isbn: isbn) } },
+                    onScan: { isbn, ean5 in Task { await handle(isbn: isbn, ean5: ean5) } },
                     onRawDetect: { payload in lastRawPayload = payload }
                 )
                 .ignoresSafeArea()
@@ -51,17 +51,18 @@ struct ScannerView: View {
         }
         .sheet(isPresented: $showManualEntry) {
             ManualISBNEntryView { isbn in
-                Task { await handle(isbn: isbn) }
+                Task { await handle(isbn: isbn, ean5: nil) }
             }
         }
         .onDisappear { torchOn = false }
     }
 
-    private func handle(isbn: String) async {
-        guard isbn != lastISBN else { return }
-        lastISBN = isbn
+    private func handle(isbn: String, ean5: String?) async {
+        let scanKey = isbn + (ean5.map { "-" + $0 } ?? "")
+        guard scanKey != lastISBN else { return }
+        lastISBN = scanKey
 
-        let book = Book(isbn: isbn)
+        let book = Book(isbn: isbn, ean5: ean5)
         context.insert(book)
         try? context.save()
         withAnimation { lastBook = book }
@@ -116,9 +117,18 @@ private struct DecisionOverlay: View {
     var body: some View {
         VStack(spacing: 10) {
             if let isbn = book.isbn {
-                Text(isbn)
-                    .font(.system(.caption, design: .monospaced))
-                    .foregroundStyle(.secondary)
+                HStack(spacing: 6) {
+                    Text(isbn)
+                        .font(.system(.caption, design: .monospaced))
+                    if let ean5 = book.ean5 {
+                        Text("+\(ean5)")
+                            .font(.system(.caption, design: .monospaced))
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(.tint.opacity(0.2), in: Capsule())
+                    }
+                }
+                .foregroundStyle(.secondary)
             }
             Text(book.title ?? "Sin título")
                 .font(.headline)

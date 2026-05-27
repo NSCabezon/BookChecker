@@ -5,6 +5,7 @@ import SwiftData
 final class Book {
     @Attribute(.unique) var id: UUID
     var isbn: String?
+    var ean5: String?
     var title: String?
     var authors: [String]
     var year: Int?
@@ -29,6 +30,7 @@ final class Book {
     init(
         id: UUID = UUID(),
         isbn: String? = nil,
+        ean5: String? = nil,
         title: String? = nil,
         authors: [String] = [],
         year: Int? = nil,
@@ -48,6 +50,7 @@ final class Book {
     ) {
         self.id = id
         self.isbn = isbn
+        self.ean5 = ean5
         self.title = title
         self.authors = authors
         self.year = year
