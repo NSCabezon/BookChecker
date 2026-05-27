@@ -1,23 +1,16 @@
-//
-//  BookCheckerApp.swift
-//  BookChecker
-//
-//  Created by nscabezon on 27/05/2026.
-//
-
 import SwiftUI
 import SwiftData
 
 @main
 struct BookCheckerApp: App {
     var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        let schema = Schema([Book.self])
+        // TODO: Cuando crees el iCloud container en App Store Connect, cambiar a:
+        // ModelConfiguration(schema: schema, cloudKitDatabase: .private("iCloud.com.ivancabezon.BookChecker"))
+        let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            return try ModelContainer(for: schema, configurations: [config])
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }
@@ -25,8 +18,19 @@ struct BookCheckerApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
         }
         .modelContainer(sharedModelContainer)
+    }
+}
+
+private struct RootView: View {
+    var body: some View {
+        TabView {
+            ScannerView()
+                .tabItem { Label("Scan", systemImage: "barcode.viewfinder") }
+            LibraryView()
+                .tabItem { Label("Library", systemImage: "books.vertical") }
+        }
     }
 }
