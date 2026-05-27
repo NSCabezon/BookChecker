@@ -1,0 +1,78 @@
+import Foundation
+import SwiftData
+
+@Model
+final class Book {
+    @Attribute(.unique) var id: UUID
+    var isbn: String?
+    var title: String?
+    var authors: [String]
+    var year: Int?
+    var publisher: String?
+    var coverURL: URL?
+
+    var decisionRaw: String
+    var keepReasonRaw: String?
+    var notes: String?
+
+    var priceMin: Decimal?
+    var priceMax: Decimal?
+    var listingsSample: [Decimal]
+    var listingsCount: Int?
+    var priceCheckedAt: Date?
+
+    @Attribute(.externalStorage) var photoData: Data?
+
+    var createdAt: Date
+    var updatedAt: Date
+
+    init(
+        id: UUID = UUID(),
+        isbn: String? = nil,
+        title: String? = nil,
+        authors: [String] = [],
+        year: Int? = nil,
+        publisher: String? = nil,
+        coverURL: URL? = nil,
+        decision: BookDecision = .pending,
+        keepReason: KeepReason? = nil,
+        notes: String? = nil,
+        priceMin: Decimal? = nil,
+        priceMax: Decimal? = nil,
+        listingsSample: [Decimal] = [],
+        listingsCount: Int? = nil,
+        priceCheckedAt: Date? = nil,
+        photoData: Data? = nil,
+        createdAt: Date = .now,
+        updatedAt: Date = .now
+    ) {
+        self.id = id
+        self.isbn = isbn
+        self.title = title
+        self.authors = authors
+        self.year = year
+        self.publisher = publisher
+        self.coverURL = coverURL
+        self.decisionRaw = decision.rawValue
+        self.keepReasonRaw = keepReason?.rawValue
+        self.notes = notes
+        self.priceMin = priceMin
+        self.priceMax = priceMax
+        self.listingsSample = listingsSample
+        self.listingsCount = listingsCount
+        self.priceCheckedAt = priceCheckedAt
+        self.photoData = photoData
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
+
+    var decision: BookDecision {
+        get { BookDecision(rawValue: decisionRaw) ?? .pending }
+        set { decisionRaw = newValue.rawValue }
+    }
+
+    var keepReason: KeepReason? {
+        get { keepReasonRaw.flatMap(KeepReason.init(rawValue:)) }
+        set { keepReasonRaw = newValue?.rawValue }
+    }
+}
