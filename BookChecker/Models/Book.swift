@@ -3,22 +3,24 @@ import SwiftData
 
 @Model
 final class Book {
-    @Attribute(.unique) var id: UUID
+    // CloudKit requirements: no `.unique` constraints, no `.externalStorage`,
+    // all non-optional properties must have a default value at declaration.
+    var id: UUID = UUID()
     var isbn: String?
     var ean5: String?
     var title: String?
-    var authors: [String]
+    var authors: [String] = []
     var year: Int?
     var publisher: String?
     var coverURL: URL?
 
-    var decisionRaw: String
+    var decisionRaw: String = BookDecision.pending.rawValue
     var keepReasonRaw: String?
     var notes: String?
 
     var priceMin: Decimal?
     var priceMax: Decimal?
-    var listingsSample: [Decimal]
+    var listingsSample: [Decimal] = []
     var listingsCount: Int?
     var priceCheckedAt: Date?
 
@@ -26,10 +28,10 @@ final class Book {
     var ratingsCount: Int?
     var userRating: Double?
 
-    @Attribute(.externalStorage) var photoData: Data?
+    var photoData: Data?
 
-    var createdAt: Date
-    var updatedAt: Date
+    var createdAt: Date = Date()
+    var updatedAt: Date = Date()
 
     init(
         id: UUID = UUID(),

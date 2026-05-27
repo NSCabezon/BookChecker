@@ -92,27 +92,55 @@ struct OpenLibraryService: MetadataProvider {
     }
 
     func searchRating(title: String, author: String?) async -> BookRating? {
-        guard let workKey = await searchWorkKey(title: title, author: author) else { return nil }
-        return await fetchRatingForWork(workKey: workKey)
+        // First pass: title + author.
+        let combinedKeys = await searchWorkKeys(title: title, author: author, limit: 5)
+        print("OpenLibrary search '\(title)' (author=\(author ?? "—")): \(combinedKeys.count) works")
+        if let hit = await firstRating(workKeys: combinedKeys) { return hit }
+
+        // Fallback: title-only — broader pool, useful when author indexing differs
+        // or when title+author hits are unrated editions.
+        guard author != nil else { return nil }
+        let titleOnlyKeys = await searchWorkKeys(title: title, author: nil, limit: 10)
+            .filter { !combinedKeys.contains($0) }
+        print("OpenLibrary fallback title-only '\(title)': \(titleOnlyKeys.count) additional works")
+        return await firstRating(workKeys: titleOnlyKeys)
     }
 
-    private func searchWorkKey(title: String, author: String?) async -> String? {
+    private func firstRating(workKeys: [String]) async -> BookRating? {
+        for key in workKeys {
+            if let rating = await fetchRatingForWork(workKey: key) {
+                print("OpenLibrary rating hit on \(key): \(rating.average) (\(rating.count ?? 0))")
+                return rating
+            }
+        }
+        return nil
+    }
+
+    private func searchWorkKeys(title: String, author: String?, limit: Int) async -> [String] {
         var components = URLComponents(string: "https://openlibrary.org/search.json")!
-        var items = [URLQueryItem(name: "title", value: title), URLQueryItem(name: "limit", value: "1")]
-        if let author { items.append(URLQueryItem(name: "author", value: author)) }
+        // Lowercase title — OL search is case-insensitive but some edge cases improve.
+        var items = [
+            URLQueryItem(name: "title", value: title.lowercased()),
+            URLQueryItem(name: "limit", value: "\(limit)")
+        ]
+        if let author, !author.isEmpty {
+            items.append(URLQueryItem(name: "author", value: author.lowercased()))
+        }
         components.queryItems = items
-        guard let url = components.url else { return nil }
+        guard let url = components.url else { return [] }
         var request = URLRequest(url: url, timeoutInterval: 8)
         request.setValue("BookChecker/1.0", forHTTPHeaderField: "User-Agent")
         do {
             let (data, response) = try await session.data(for: request)
-            guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return nil }
+            guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return [] }
             guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  let docs = json["docs"] as? [[String: Any]],
-                  let key = docs.first?["key"] as? String else { return nil }
-            return key.hasPrefix("/") ? String(key.dropFirst()) : key
+                  let docs = json["docs"] as? [[String: Any]] else { return [] }
+            return docs.compactMap { doc -> String? in
+                guard let key = doc["key"] as? String else { return nil }
+                return key.hasPrefix("/") ? String(key.dropFirst()) : key
+            }
         } catch {
-            return nil
+            return []
         }
     }
 

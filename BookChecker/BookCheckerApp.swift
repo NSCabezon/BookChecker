@@ -5,9 +5,11 @@ import SwiftData
 struct BookCheckerApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([Book.self])
-        // TODO: Cuando crees el iCloud container en App Store Connect, cambiar a:
-        // ModelConfiguration(schema: schema, cloudKitDatabase: .private("iCloud.com.ivancabezon.BookChecker"))
-        let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        let config = ModelConfiguration(
+            schema: schema,
+            isStoredInMemoryOnly: false,
+            cloudKitDatabase: .private("iCloud.com.ivancabezon.BookChecker")
+        )
 
         do {
             return try ModelContainer(for: schema, configurations: [config])
