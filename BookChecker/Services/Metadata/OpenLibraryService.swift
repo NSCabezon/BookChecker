@@ -91,6 +91,31 @@ struct OpenLibraryService: MetadataProvider {
         }
     }
 
+    func searchRating(title: String, author: String?) async -> BookRating? {
+        guard let workKey = await searchWorkKey(title: title, author: author) else { return nil }
+        return await fetchRatingForWork(workKey: workKey)
+    }
+
+    private func searchWorkKey(title: String, author: String?) async -> String? {
+        var components = URLComponents(string: "https://openlibrary.org/search.json")!
+        var items = [URLQueryItem(name: "title", value: title), URLQueryItem(name: "limit", value: "1")]
+        if let author { items.append(URLQueryItem(name: "author", value: author)) }
+        components.queryItems = items
+        guard let url = components.url else { return nil }
+        var request = URLRequest(url: url, timeoutInterval: 8)
+        request.setValue("BookChecker/1.0", forHTTPHeaderField: "User-Agent")
+        do {
+            let (data, response) = try await session.data(for: request)
+            guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return nil }
+            guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let docs = json["docs"] as? [[String: Any]],
+                  let key = docs.first?["key"] as? String else { return nil }
+            return key.hasPrefix("/") ? String(key.dropFirst()) : key
+        } catch {
+            return nil
+        }
+    }
+
     private func fetchRatingForWork(workKey: String) async -> BookRating? {
         guard let url = URL(string: "https://openlibrary.org/\(workKey)/ratings.json") else { return nil }
         var request = URLRequest(url: url, timeoutInterval: 8)

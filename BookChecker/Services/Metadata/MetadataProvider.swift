@@ -26,11 +26,13 @@ protocol MetadataProvider: Sendable {
     func fetchMetadata(isbn: String) async -> BookMetadata?
     func searchMetadata(title: String, author: String?) async -> BookMetadata?
     func fetchRating(isbn: String) async -> BookRating?
+    func searchRating(title: String, author: String?) async -> BookRating?
 }
 
 extension MetadataProvider {
     func searchMetadata(title: String, author: String?) async -> BookMetadata? { nil }
     func fetchRating(isbn: String) async -> BookRating? { nil }
+    func searchRating(title: String, author: String?) async -> BookRating? { nil }
 }
 
 actor MetadataResolver {
@@ -61,6 +63,15 @@ actor MetadataResolver {
     func fetchRating(isbn: String) async -> BookRating? {
         for provider in providers {
             if let rating = await provider.fetchRating(isbn: isbn) {
+                return rating
+            }
+        }
+        return nil
+    }
+
+    func searchRating(title: String, author: String?) async -> BookRating? {
+        for provider in providers {
+            if let rating = await provider.searchRating(title: title, author: author) {
                 return rating
             }
         }

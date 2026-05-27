@@ -27,6 +27,14 @@ struct GoogleBooksService: MetadataProvider {
         return BookRating(average: avg, count: metadata.ratingsCount, source: name)
     }
 
+    func searchRating(title: String, author: String?) async -> BookRating? {
+        let titlePart = "intitle:\(title)"
+        let authorPart = author.map { "+inauthor:\($0)" } ?? ""
+        guard let metadata = await query(q: titlePart + authorPart),
+              let avg = metadata.averageRating else { return nil }
+        return BookRating(average: avg, count: metadata.ratingsCount, source: name)
+    }
+
     private func query(q: String) async -> BookMetadata? {
         var components = URLComponents(string: "https://www.googleapis.com/books/v1/volumes")!
         var items = [URLQueryItem(name: "q", value: q)]
