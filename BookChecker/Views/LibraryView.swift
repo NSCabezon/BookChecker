@@ -19,13 +19,22 @@ struct LibraryView: View {
                 BookDetailView(book: book)
             }
             .toolbar {
-                Picker("Filter", selection: $filter) {
-                    Text("All").tag(BookDecision?.none)
-                    ForEach(BookDecision.allCases) { d in
-                        Text(d.rawValue.capitalized).tag(Optional(d))
+                Menu {
+                    Button {
+                        filter = nil
+                    } label: {
+                        Label("All", systemImage: filter == nil ? "checkmark" : "")
                     }
+                    ForEach(BookDecision.allCases) { d in
+                        Button {
+                            filter = d
+                        } label: {
+                            Label(d.rawValue.capitalized, systemImage: filter == d ? "checkmark" : "")
+                        }
+                    }
+                } label: {
+                    Image(systemName: "line.3.horizontal.decrease.circle")
                 }
-                .pickerStyle(.menu)
             }
         }
     }
