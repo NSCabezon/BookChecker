@@ -22,6 +22,9 @@ final class Book {
     var listingsCount: Int?
     var priceCheckedAt: Date?
 
+    var rating: Double?
+    var ratingsCount: Int?
+
     @Attribute(.externalStorage) var photoData: Data?
 
     var createdAt: Date
@@ -44,6 +47,8 @@ final class Book {
         listingsSample: [Decimal] = [],
         listingsCount: Int? = nil,
         priceCheckedAt: Date? = nil,
+        rating: Double? = nil,
+        ratingsCount: Int? = nil,
         photoData: Data? = nil,
         createdAt: Date = .now,
         updatedAt: Date = .now
@@ -64,6 +69,8 @@ final class Book {
         self.listingsSample = listingsSample
         self.listingsCount = listingsCount
         self.priceCheckedAt = priceCheckedAt
+        self.rating = rating
+        self.ratingsCount = ratingsCount
         self.photoData = photoData
         self.createdAt = createdAt
         self.updatedAt = updatedAt

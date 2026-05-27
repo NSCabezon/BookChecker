@@ -116,11 +116,25 @@ private struct BookRow: View {
                 }
             }
             Spacer()
-            Text(book.decision.rawValue.capitalized)
-                .font(.caption2)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(.quaternary, in: Capsule())
+            VStack(alignment: .trailing, spacing: 4) {
+                Text(book.decision.rawValue.capitalized)
+                    .font(.caption2)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(.quaternary, in: Capsule())
+                if let rating = book.rating {
+                    RatingStarsView(rating: rating, count: nil, compact: true)
+                }
+                if let min = book.priceMin, let max = book.priceMax {
+                    Text("\(min.formatted(.currency(code: "EUR"))) – \(max.formatted(.currency(code: "EUR")))")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                } else if let min = book.priceMin {
+                    Text(min.formatted(.currency(code: "EUR")))
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
     }
 }

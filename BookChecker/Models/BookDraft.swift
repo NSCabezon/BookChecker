@@ -8,6 +8,8 @@ struct BookDraft: Equatable {
     var year: Int?
     var publisher: String?
     var coverURL: URL?
+    var rating: Double?
+    var ratingsCount: Int?
     var source: String?
 
     init(
@@ -18,6 +20,8 @@ struct BookDraft: Equatable {
         year: Int? = nil,
         publisher: String? = nil,
         coverURL: URL? = nil,
+        rating: Double? = nil,
+        ratingsCount: Int? = nil,
         source: String? = nil
     ) {
         self.isbn = isbn
@@ -27,6 +31,8 @@ struct BookDraft: Equatable {
         self.year = year
         self.publisher = publisher
         self.coverURL = coverURL
+        self.rating = rating
+        self.ratingsCount = ratingsCount
         self.source = source
     }
 
@@ -39,6 +45,8 @@ struct BookDraft: Equatable {
             year: metadata.year,
             publisher: metadata.publisher,
             coverURL: metadata.coverURL,
+            rating: metadata.averageRating,
+            ratingsCount: metadata.ratingsCount,
             source: metadata.source
         )
     }
@@ -51,7 +59,9 @@ struct BookDraft: Equatable {
             authors: authors,
             year: year,
             publisher: publisher,
-            coverURL: coverURL
+            coverURL: coverURL,
+            rating: rating,
+            ratingsCount: ratingsCount
         )
     }
 

@@ -53,6 +53,8 @@ struct GoogleBooksService: MetadataProvider {
             publisher: info.publisher,
             year: info.publishedDate.flatMap(yearFromDate),
             coverURL: info.imageLinks?.thumbnail.flatMap(URL.init(string:)),
+            averageRating: info.averageRating,
+            ratingsCount: info.ratingsCount,
             source: name
         )
     }
@@ -70,6 +72,8 @@ struct GoogleBooksService: MetadataProvider {
             let publisher: String?
             let publishedDate: String?
             let imageLinks: ImageLinks?
+            let averageRating: Double?
+            let ratingsCount: Int?
         }
         struct ImageLinks: Decodable {
             let thumbnail: String?

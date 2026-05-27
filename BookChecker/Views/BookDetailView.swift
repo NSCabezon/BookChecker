@@ -2,8 +2,11 @@ import SwiftUI
 import SwiftData
 
 struct BookDetailView: View {
+    @Environment(\.modelContext) private var context
+    @Environment(\.pricingAggregator) private var pricingAggregator
     @Bindable var book: Book
     @State private var showISBNScanner = false
+    @State private var isRefreshingPrice = false
 
     var body: some View {
         Form {
@@ -38,6 +41,12 @@ struct BookDetailView: View {
                 TextField("Publisher", text: Binding($book.publisher, replacingNilWith: ""))
             }
 
+            if let rating = book.rating {
+                Section("Rating") {
+                    RatingStarsView(rating: rating, count: book.ratingsCount)
+                }
+            }
+
             Section("Decision") {
                 Picker("Decision", selection: $book.decision) {
                     ForEach(BookDecision.allCases) { d in
@@ -66,6 +75,20 @@ struct BookDetailView: View {
                 if let at = book.priceCheckedAt {
                     LabeledContent("Checked", value: at.formatted(date: .abbreviated, time: .shortened))
                 }
+                Button {
+                    Task { await refreshPricing() }
+                } label: {
+                    HStack {
+                        if isRefreshingPrice {
+                            ProgressView()
+                            Text("Buscando…")
+                        } else {
+                            Image(systemName: "arrow.clockwise")
+                            Text("Actualizar precio")
+                        }
+                    }
+                }
+                .disabled(isRefreshingPrice || (book.isbn ?? "").isEmpty)
             }
 
             Section("Notes") {
@@ -83,6 +106,12 @@ struct BookDetailView: View {
             }
         }
     }
+
+    private func refreshPricing() async {
+        isRefreshingPrice = true
+        await updatePricing(for: book, using: pricingAggregator, context: context)
+        isRefreshingPrice = false
+    }
 }
 
 #Preview {
@@ -91,4 +120,3 @@ struct BookDetailView: View {
     }
     .modelContainer(PreviewSamples.inMemoryContainer(with: [PreviewSamples.bookSell]))
 }
-

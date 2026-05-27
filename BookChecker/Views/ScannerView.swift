@@ -17,6 +17,7 @@ enum ScanMode: String, CaseIterable, Identifiable {
 struct ScannerView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.metadataResolver) private var resolver
+    @Environment(\.pricingAggregator) private var pricingAggregator
 
     @State private var scanMode: ScanMode = .barcode
     @State private var state: ScannerState = .ready
@@ -274,6 +275,7 @@ struct ScannerView: View {
         context.insert(book)
         try? context.save()
         state = .deciding(book)
+        Task { await updatePricing(for: book, using: pricingAggregator, context: context) }
     }
 
     private func cancelDraft() {

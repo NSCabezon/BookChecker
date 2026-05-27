@@ -54,6 +54,8 @@ struct OpenLibraryService: MetadataProvider {
             publisher: publisher,
             year: year,
             coverURL: coverURL,
+            averageRating: nil,
+            ratingsCount: nil,
             source: name
         )
     }

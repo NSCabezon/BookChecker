@@ -17,11 +17,13 @@ struct BookCheckerApp: App {
     }()
 
     let resolver = MetadataResolver.makeDefault()
+    let pricingAggregator = PricingAggregator.makeDefault()
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environment(\.metadataResolver, resolver)
+                .environment(\.pricingAggregator, pricingAggregator)
         }
         .modelContainer(sharedModelContainer)
     }

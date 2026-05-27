@@ -11,6 +11,8 @@ enum PreviewSamples {
         year: 2003,
         publisher: "Penguin Classics",
         coverURL: URL(string: "https://covers.openlibrary.org/b/isbn/9780140449266-L.jpg"),
+        rating: 4.5,
+        ratingsCount: 312,
         source: "OpenLibrary"
     )
 
@@ -34,7 +36,9 @@ enum PreviewSamples {
             priceMax: 22.00,
             listingsSample: [8.50, 12.00, 15.00, 22.00],
             listingsCount: 4,
-            priceCheckedAt: Date(timeIntervalSince1970: 1_736_000_000)
+            priceCheckedAt: Date(timeIntervalSince1970: 1_736_000_000),
+            rating: 4.3,
+            ratingsCount: 287
         )
     }
 

@@ -6,6 +6,8 @@ struct BookMetadata: Sendable, Equatable {
     var publisher: String?
     var year: Int?
     var coverURL: URL?
+    var averageRating: Double?
+    var ratingsCount: Int?
     var source: String
 
     var isUsable: Bool {

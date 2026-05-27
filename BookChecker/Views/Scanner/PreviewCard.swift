@@ -58,6 +58,10 @@ struct PreviewCard: View {
                             .font(.caption2)
                             .foregroundStyle(.tertiary)
                     }
+                    if let rating = draft.rating {
+                        RatingStarsView(rating: rating, count: draft.ratingsCount, compact: true)
+                            .padding(.top, 2)
+                    }
                 }
                 Spacer(minLength: 0)
             }
