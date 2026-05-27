@@ -1,9 +1,26 @@
+import AVFoundation
 import SwiftUI
 import Vision
 import VisionKit
 
 struct ISBNScanner: UIViewControllerRepresentable {
     let onScan: (String) -> Void
+    let onRawDetect: ((String) -> Void)?
+    @Binding var torchOn: Bool
+
+    init(
+        torchOn: Binding<Bool>,
+        onScan: @escaping (String) -> Void,
+        onRawDetect: ((String) -> Void)? = nil
+    ) {
+        self._torchOn = torchOn
+        self.onScan = onScan
+        self.onRawDetect = onRawDetect
+    }
+
+    static var isAvailable: Bool {
+        DataScannerViewController.isSupported && DataScannerViewController.isAvailable
+    }
 
     func makeUIViewController(context: Context) -> DataScannerViewController {
         let controller = DataScannerViewController(
@@ -14,23 +31,60 @@ struct ISBNScanner: UIViewControllerRepresentable {
             isHighlightingEnabled: true
         )
         controller.delegate = context.coordinator
-        try? controller.startScanning()
         return controller
     }
 
-    func updateUIViewController(_ uiViewController: DataScannerViewController, context: Context) {}
+    func updateUIViewController(_ uiViewController: DataScannerViewController, context: Context) {
+        context.coordinator.onScan = onScan
+        context.coordinator.onRawDetect = onRawDetect
+
+        if !uiViewController.isScanning {
+            do {
+                try uiViewController.startScanning()
+            } catch {
+                print("ISBNScanner.startScanning failed: \(error)")
+            }
+        }
+
+        applyTorch(torchOn, controller: uiViewController)
+    }
+
+    private func applyTorch(_ on: Bool, controller: DataScannerViewController) {
+        guard let device = AVCaptureDevice.userPreferredCamera,
+              device.hasTorch,
+              device.isTorchAvailable else {
+            print("Torch: no compatible device")
+            return
+        }
+        guard (device.torchMode == .on) != on else { return }
+
+        do {
+            try device.lockForConfiguration()
+            if on {
+                try device.setTorchModeOn(level: 1.0)
+            } else {
+                device.torchMode = .off
+            }
+            device.unlockForConfiguration()
+            print("Torch set to \(on ? "ON" : "OFF")")
+        } catch {
+            print("Torch toggle failed: \(error)")
+        }
+    }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(onScan: onScan)
+        Coordinator(onScan: onScan, onRawDetect: onRawDetect)
     }
 
     final class Coordinator: NSObject, DataScannerViewControllerDelegate {
-        let onScan: (String) -> Void
+        var onScan: (String) -> Void
+        var onRawDetect: ((String) -> Void)?
         private var lastScanned: String?
         private var lastScanAt: Date = .distantPast
 
-        init(onScan: @escaping (String) -> Void) {
+        init(onScan: @escaping (String) -> Void, onRawDetect: ((String) -> Void)?) {
             self.onScan = onScan
+            self.onRawDetect = onRawDetect
         }
 
         func dataScanner(
@@ -38,11 +92,28 @@ struct ISBNScanner: UIViewControllerRepresentable {
             didAdd addedItems: [RecognizedItem],
             allItems: [RecognizedItem]
         ) {
-            for item in addedItems {
+            process(items: addedItems)
+        }
+
+        func dataScanner(
+            _ dataScanner: DataScannerViewController,
+            didUpdate updatedItems: [RecognizedItem],
+            allItems: [RecognizedItem]
+        ) {
+            process(items: updatedItems)
+        }
+
+        func dataScanner(_ dataScanner: DataScannerViewController, didTapOn item: RecognizedItem) {
+            process(items: [item])
+        }
+
+        private func process(items: [RecognizedItem]) {
+            for item in items {
                 guard case let .barcode(barcode) = item,
-                      let payload = barcode.payloadStringValue,
-                      isISBN(payload),
-                      shouldEmit(payload) else { continue }
+                      let payload = barcode.payloadStringValue else { continue }
+                print("ISBNScanner detected payload: \(payload)")
+                onRawDetect?(payload)
+                guard isISBN(payload), shouldEmit(payload) else { continue }
                 lastScanned = payload
                 lastScanAt = .now
                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
