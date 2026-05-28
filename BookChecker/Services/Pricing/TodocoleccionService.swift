@@ -14,15 +14,22 @@ struct TodocoleccionService: PricingProvider {
         components.queryItems = [URLQueryItem(name: "bu", value: isbn)]
         guard let url = components.url else { return .empty }
 
-        guard let html = await PricingScrapingHelpers.fetchHTML(url: url, session: session) else {
+        let (html, status) = await PricingScrapingHelpers.fetchHTML(url: url, session: session)
+        guard let html else {
+            PricingScrapingHelpers.logHealth(source: name, isbn: isbn, status: status, rawCount: 0, kept: 0)
             return .empty
         }
+        let prices = Self.parsePrices(html: html)
+        let result = PricingScrapingHelpers.makeResult(prices: prices, source: name)
+        PricingScrapingHelpers.logHealth(source: name, isbn: isbn, status: status, rawCount: prices.count, kept: result.listingsCount)
+        return result
+    }
 
-        // HTML pattern: "11,41 €" — regex captures numeric, allowing nbsp/regular space.
-        let prices = PricingScrapingHelpers.extractPrices(
-            html: html,
-            regexPattern: #"(\d+[.,]\d{2})\s*€"#
-        )
-        return PricingScrapingHelpers.makeResult(prices: prices, source: name)
+    /// Extracts only listing-card prices, scoped to `<span class="card-price ...">X,YY €</span>` markup.
+    /// Excludes any other euro-formatted numbers on the page (filters, shipping estimates, totals).
+    static func parsePrices(html: String) -> [Decimal] {
+        // Anchor: tag carrying the `card-price` class, followed by `X,YY €` (with optional nbsp/space).
+        let pattern = #"class="[^"]*\bcard-price\b[^"]*"[^>]*>\s*(\d+[.,]\d{2})\s*€"#
+        return PricingScrapingHelpers.extractPrices(html: html, regexPattern: pattern)
     }
 }
