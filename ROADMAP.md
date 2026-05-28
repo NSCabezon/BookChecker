@@ -24,13 +24,11 @@ Legend: ✅ done · 🟡 in progress · 🔵 next up · ⚪ later · 💭 idea
 
 ## Priority 1 — Robustness of existing flows
 
-### Scraper hardening 🔵
-Current regex parsers are fragile and pick up shipping costs alongside item prices.
-
-- Replace single-regex with HTML-section scoping (parse listing cards, not whole page).
-- Use `swift-html-to-markdown` or `SwiftSoup` (CSS selectors) instead of raw regex.
-- Add per-source unit tests with checked-in HTML fixtures (no live network).
-- Track scraper health: log when 0 results despite HTTP 200 — possible layout change.
+### Scraper hardening ✅
+- ✅ Class-scoped regex: Iberlibro now requires `class="…item-price…"` (excludes `item-shipping…` and the misc `EUR X,YY` strings on the page). Todocoleccion requires `class="…card-price…"`.
+- ✅ Per-source XCTest suite with 4 real HTML fixtures + hand-crafted edge fragments in `BookCheckerTests/`.
+- ✅ `Logger` (subsystem `com.ivancabezon.BookChecker`, category `pricing`) replaces raw `print` inside helpers; `logHealth` warns on `HTTP 200 + 0 prices` (layout-change signal) and on `200 + all dropped by filter`.
+- ⚪ Did **not** adopt SwiftSoup / swift-html-to-markdown — class-anchored regex was enough; revisit if the markup grows nested. Surface stays compatible.
 - **Plan B if Apple/anti-bot pushes back**: move scraping to a Cloudflare Worker. Keep `PricingProvider` protocol surface stable; the worker just becomes the URL behind `URLSession`.
 
 ### Background enrichment reliability 🔵
@@ -142,11 +140,10 @@ Schema currently in development env. Before TestFlight:
 
 ## Priority 6 — Architecture / DX
 
-### Tests 🔵
-No test target. Add at minimum:
-- `Tests/Pricing/` — scraper fixtures + parsing assertions.
-- `Tests/Metadata/` — JSON fixtures from Open Library / Google Books.
-- `Tests/BookDraft` — `from(metadata:)` → `toBook()` round-trip.
+### Tests 🟡
+- ✅ `BookCheckerTests/Pricing/` — scraper fixtures (`Resources/{Iberlibro,Todocoleccion}/*.html`) + parsing assertions + helper unit tests. **Requires test target setup in Xcode** (see PR description for scraper-hardening).
+- ⚪ `BookCheckerTests/Metadata/` — JSON fixtures from Open Library / Google Books.
+- ⚪ `BookCheckerTests/BookDraft` — `from(metadata:)` → `toBook()` round-trip.
 
 ### Logging ⚪
 `print` everywhere. Switch to `Logger` with subsystems:
